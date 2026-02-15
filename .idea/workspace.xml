@@ -1,7 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="2c895bc1-6aef-43a6-ab07-31c088f9dd70" name="Changes" comment="Codecommit - App tested in local" />
+    <list default="true" id="2c895bc1-6aef-43a6-ab07-31c088f9dd70" name="Changes" comment="updated terraform in github actions">
+      <change beforePath="$PROJECT_DIR$/.github/workflows/deploy.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/deploy.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.github/workflows/destroy.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/destroy.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/FastAPIProject.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -57,6 +65,7 @@
   </component>
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
+    &quot;ASKED_MARK_IGNORED_FILES_AS_EXCLUDED&quot;: &quot;true&quot;,
     &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
     &quot;FastAPI.FastAPIProject-test.executor&quot;: &quot;Run&quot;,
     &quot;FastAPI.FastAPIProject.executor&quot;: &quot;Run&quot;,
@@ -67,6 +76,7 @@
     &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;Terraform.Destroy terraform.executor&quot;: &quot;Run&quot;,
     &quot;ai.playground.ignore.import.keys.banner.in.settings&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;master&quot;,
     &quot;last_opened_file_path&quot;: &quot;C:/Users/Karthick Raja Ramasa/PycharmProjects/FastAPIProject&quot;,
@@ -77,6 +87,9 @@
 }</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\Karthick Raja Ramasa\PycharmProjects\FastAPIProject\terraform" />
+      <recent name="C:\Users\Karthick Raja Ramasa\PycharmProjects\FastAPIProject\terraform\modules\ecr" />
+      <recent name="C:\Users\Karthick Raja Ramasa\PycharmProjects\FastAPIProject\terraform\modules" />
       <recent name="C:\Users\Karthick Raja Ramasa\PycharmProjects\FastAPIProject\app" />
     </key>
   </component>
@@ -87,7 +100,7 @@
       </set>
     </option>
   </component>
-  <component name="RunManager" selected="FastAPI.FastAPIProject">
+  <component name="RunManager" selected="Terraform.Destroy terraform">
     <configuration name="test_main | #1" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" temporary="true" nameIsGenerated="true" path="$PROJECT_DIR$/test_main.http" executionIdentifier="#1" runType="Run single request">
       <method v="2" />
     </configuration>
@@ -111,13 +124,36 @@
       <option name="launchJavascriptDebuger" value="false" />
       <method v="2" />
     </configuration>
+    <configuration name="Destroy terraform" type="TerraformConfigurationType" factoryName="Terraform destroy" temporary="true" show_console_on_std_err="false" show_console_on_std_out="false">
+      <option name="allowRunningInParallel" value="false" />
+      <option name="commandType" value="DESTROY" />
+      <option name="envFilePaths">
+        <list />
+      </option>
+      <option name="envs">
+        <map />
+      </option>
+      <option name="globalOptions" value="" />
+      <option name="passGlobalOptions" value="false" />
+      <option name="passParentEnvs" value="true" />
+      <option name="programArguments" value="" />
+      <option name="programParameters" value="destroy" />
+      <option name="projectPathOnTarget" />
+      <option name="selectedOptions">
+        <list />
+      </option>
+      <option name="workingDirectory" value="C:\Users\Karthick Raja Ramasa\PycharmProjects\FastAPIProject\terraform" />
+      <method v="2" />
+    </configuration>
     <list>
       <item itemvalue="FastAPI.FastAPIProject" />
       <item itemvalue="HTTP Request.test_main | #1" />
       <item itemvalue="HTTP Request.test_main | #2" />
+      <item itemvalue="Terraform.Destroy terraform" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Terraform.Destroy terraform" />
         <item itemvalue="HTTP Request.test_main | #2" />
         <item itemvalue="HTTP Request.test_main | #1" />
       </list>
@@ -141,7 +177,9 @@
       <workItem from="1771049995593" duration="13938000" />
       <workItem from="1771074277821" duration="1396000" />
       <workItem from="1771076098548" duration="10106000" />
-      <workItem from="1771131183846" duration="7939000" />
+      <workItem from="1771131183846" duration="10934000" />
+      <workItem from="1771155156413" duration="6066000" />
+      <workItem from="1771165107150" duration="6641000" />
     </task>
     <task id="LOCAL-00001" summary="Codecommit - App tested in local">
       <option name="closed" value="true" />
@@ -159,7 +197,71 @@
       <option name="project" value="LOCAL" />
       <updated>1771139578499</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="setup docker and github action for ecr">
+      <option name="closed" value="true" />
+      <created>1771139851903</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1771139851903</updated>
+    </task>
+    <task id="LOCAL-00004" summary="setup docker and github action for ecr">
+      <option name="closed" value="true" />
+      <created>1771140291890</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1771140291890</updated>
+    </task>
+    <task id="LOCAL-00005" summary="setup docker and github action for ecr">
+      <option name="closed" value="true" />
+      <created>1771140699661</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1771140699661</updated>
+    </task>
+    <task id="LOCAL-00006" summary="setup docker and github action for ecr">
+      <option name="closed" value="true" />
+      <created>1771140921244</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1771140921244</updated>
+    </task>
+    <task id="LOCAL-00007" summary="setup docker and github action for ecr">
+      <option name="closed" value="true" />
+      <created>1771141184224</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1771141184224</updated>
+    </task>
+    <task id="LOCAL-00008" summary="updated pydantic version error">
+      <option name="closed" value="true" />
+      <created>1771141555444</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1771141555444</updated>
+    </task>
+    <task id="LOCAL-00009" summary="updated ecs and github actions">
+      <option name="closed" value="true" />
+      <created>1771159335790</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1771159335791</updated>
+    </task>
+    <task id="LOCAL-00010" summary="updated terraform in github actions">
+      <option name="closed" value="true" />
+      <created>1771166146669</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1771166146669</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -178,7 +280,11 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Codecommit - App tested in local" />
-    <option name="LAST_COMMIT_MESSAGE" value="Codecommit - App tested in local" />
+    <MESSAGE value="setup docker and github action for ecr" />
+    <MESSAGE value="updated pydantic version error" />
+    <MESSAGE value="updated ecs and github actions" />
+    <MESSAGE value="updated terraform in github actions" />
+    <option name="LAST_COMMIT_MESSAGE" value="updated terraform in github actions" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/FastAPIProject$FastAPIProject.coverage" NAME="FastAPIProject Coverage Results" MODIFIED="1771083184413" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />

@@ -4,6 +4,13 @@ on:
   push:
     branches: ["master"]
 
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  ECR_REPOSITORY: task-tracker-api
+  ECS_SERVICE: task-tracker-service        # From your terraform
+  ECS_CLUSTER: task-tracker-cluster        # From your terraform
+  CONTAINER_NAME: api-container            # From your container_definitions in terraform
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -23,11 +30,35 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build, Tag and push image
+      - name: Build, Tag, and Push image
+        id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: task-tracker-api
-          IMAGE_TAG: latest
-        run:  |
+          IMAGE_TAG: ${{ github.sha }} # Best practice: use commit SHA instead of 'latest'
+        run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+# Step 1: Download current task definition
+      - name: Download task definition
+        run: |
+          aws ecs describe-task-definition --task-definition task-tracker-api --query taskDefinition > task-definition.json
+
+      # Step 2: Fill in the new image ID in the task definition
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: ${{ env.CONTAINER_NAME }}
+          image: ${{ steps.build-image.outputs.image }}
+
+      # Step 3: Deploy the new task definition
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true

@@ -1,2 +1,5 @@
 /.venv/
 .idea
+__pycahce__/
+*.db
+.git

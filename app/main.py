@@ -11,19 +11,22 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Task Tracker API")
 
+#pydantic schemas
 class TaskCreate(BaseModel):
-    title: str
-    description: str | None = None
+    username: str
+    taskassigned: str | None = None
 
 class TaskResponse(BaseModel):
     id: int
-    title: str
-    description: Optional[str] = None
+    username: str
+    taskassigned: str
     completed: bool
     created_at: datetime
 
     class Config:
         from_attributes =  True
+
+#endpoint update
 @app.post("/tasks", response_model=TaskResponse)
 def create_task(task: TaskCreate, db: Session = Depends(get_db)):
     db_task = Task(**task.dict())

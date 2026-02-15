@@ -1,21 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="2c895bc1-6aef-43a6-ab07-31c088f9dd70" name="Changes" comment="Codecommit - App tested in local">
-      <change afterPath="$PROJECT_DIR$/.github/workflows/deploy.yml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/FastAPIProject.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Dockerfile" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/terraform/ecr.tf" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/terraform/main.tf" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/terraform/variables.tf" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/models.py" afterDir="false" />
-    </list>
+    <list default="true" id="2c895bc1-6aef-43a6-ab07-31c088f9dd70" name="Changes" comment="Codecommit - App tested in local" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -155,7 +141,7 @@
       <workItem from="1771049995593" duration="13938000" />
       <workItem from="1771074277821" duration="1396000" />
       <workItem from="1771076098548" duration="10106000" />
-      <workItem from="1771131183846" duration="7561000" />
+      <workItem from="1771131183846" duration="7939000" />
     </task>
     <task id="LOCAL-00001" summary="Codecommit - App tested in local">
       <option name="closed" value="true" />
@@ -165,7 +151,15 @@
       <option name="project" value="LOCAL" />
       <updated>1771082525101</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Codecommit - App tested in local">
+      <option name="closed" value="true" />
+      <created>1771139578499</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1771139578499</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

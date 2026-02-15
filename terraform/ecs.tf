@@ -33,7 +33,7 @@ resource "aws_iam_role_policy_attachment" "ecs_exec_role_policy" {
 resource "aws_security_group" "api_sg" {
   name        = "${var.project_name}-api-sg"
   description = "Allow inbound traffic to Task Tracker API"
-  vpc_id      = data.aws_vpc.default.idyes
+  vpc_id      = data.aws_vpc.default.id
 
   ingress {
     from_port   = 8000 # Change this to match your app port (FastAPI usually 8000)

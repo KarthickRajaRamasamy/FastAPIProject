@@ -20,7 +20,7 @@ RUN groupadd -r appuser && useradd  -r -g appuser appuser
 
 #Copy only the installed python packages from the builder stage
 COPY --from=builder /root/.local /home/appuser/.local
-COPY ./app ./app
+COPY ./app /app/
 
 #App can find the envionment variable
 ENV PATH=/home/appuser/.local/bin:$PATH
@@ -34,4 +34,4 @@ USER appuser
 EXPOSE 8000
 
 #command to start the application
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

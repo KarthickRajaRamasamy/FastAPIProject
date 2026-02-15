@@ -41,6 +41,21 @@ resource "aws_security_group" "api_sg" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
+  # Node Exporter Access (Prometheus Scrape)
+  ingress {
+    from_port   = 9100
+    to_port     = 9100
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  #  (Grafana)
+  ingress {
+    from_port   = 3000
+    to_port     = 3000
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
   egress {
     from_port   = 0
@@ -60,8 +75,8 @@ resource "aws_ecs_task_definition" "api_task" {
   family                   = "task-tracker-api"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
-  cpu                      = "256" # 0.25 vCPU
-  memory                   = "512" # 0.5 GB
+  cpu                      = "512" #  vCPU
+  memory                   = "1024" #  GB
   execution_role_arn       = aws_iam_role.ecs_exec_role.arn
 
   container_definitions = jsonencode([
@@ -69,12 +84,16 @@ resource "aws_ecs_task_definition" "api_task" {
       name      = "api-container"
       image     = aws_ecr_repository.api_repo.repository_url # Link to your ecr.tf resource
       essential = true
-      portMappings = [
-        {
-          containerPort = 8000
-          hostPort      = 8000
-        }
-      ]
+      portMappings = [{ containerPort = 8000, hostPort      = 8000 }]
+    },
+    # The Prometheus Node Exporter Sidecar
+    {
+      name      = "node-exporter"
+      image     = "prom/node-exporter:latest"
+      essential = false # If monitoring fails, the app stays up
+      portMappings = [{ containerPort = 9100, hostPort = 9100 }]
+      # Optional: Add command to disable collectors that need root (Fargate doesn't allow)
+      command = ["--path.procfs=/host/proc", "--path.sysfs=/host/sys"]
     }
   ])
 }
@@ -91,5 +110,34 @@ resource "aws_ecs_service" "api_service" {
     subnets          = data.aws_subnets.default.ids
     assign_public_ip = true
     security_groups  = [aws_security_group.api_sg.id]
+  }
+}
+
+resource "aws_ecs_task_definition" "grafana_task" {
+  family                   = "grafana"
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+  cpu                      = "256"
+  memory                   = "512"
+  execution_role_arn       = aws_iam_role.ecs_exec_role.arn
+
+  container_definitions = jsonencode([{
+    name  = "grafana"
+    image = "grafana/grafana:latest"
+    portMappings = [{ containerPort = 3000, hostPort = 3000 }]
+  }])
+}
+
+resource "aws_ecs_service" "grafana_service" {
+  name            = "grafana-service"
+  cluster         = aws_ecs_cluster.main.id
+  task_definition = aws_ecs_task_definition.grafana_task.arn
+  desired_count   = 1
+  launch_type     = "FARGATE"
+
+  network_configuration {
+    subnets          = data.aws_subnets.default.ids
+    assign_public_ip = true
+    security_groups  = [aws_security_group.api_sg.id] # Sharing the same SG for now
   }
 }

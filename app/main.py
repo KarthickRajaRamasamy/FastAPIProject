@@ -5,11 +5,15 @@ from typing import List, Optional
 from database import SessionLocal, engine, get_db
 from datetime import datetime
 from models import Base, Task
+from prometheus_fastapi_instrumentator import Instrumentator
 
 # Create the database tables
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Task Tracker API")
+
+# Initialize Prometheus Instrumentator ---
+Instrumentator().instrument(app).expose(app)
 
 #pydantic schemas
 class TaskCreate(BaseModel):

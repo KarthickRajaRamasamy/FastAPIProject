@@ -84,6 +84,15 @@ resource "aws_security_group" "api_sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
+}
+resource "aws_security_group_rule" "allow_prometheus_internal" {
+  type                     = "ingress"
+  from_port                = 9090
+  to_port                  = 9090
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.api_sg.id
+  source_security_group_id = aws_security_group.api_sg.id
 }
 
 # The Cluster

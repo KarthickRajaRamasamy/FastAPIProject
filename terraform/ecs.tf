@@ -120,7 +120,7 @@ resource "aws_ecs_task_definition" "api_task" {
       essential = false # If monitoring fails, the app stays up
       portMappings = [{ containerPort = 9100, hostPort = 9100 }]
 
-    }
+    },
     # 3. PROMETHEUS SERVER
     {
       name      = "prometheus"

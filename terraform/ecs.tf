@@ -30,6 +30,20 @@ resource "aws_iam_role_policy_attachment" "ecs_exec_role_policy" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
+resource "aws_iam_role_policy" "ssm_read" {
+  name = "ssm-read-policy"
+  role = aws_iam_role.ecs_exec_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = ["ssm:GetParameters"]
+      Resource = [aws_ssm_parameter.prometheus_config.arn]
+    }]
+  })
+}
+
 resource "aws_security_group" "api_sg" {
   name        = "${var.project_name}-api-sg"
   description = "Allow inbound traffic to Task Tracker API"
@@ -56,6 +70,13 @@ resource "aws_security_group" "api_sg" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
+  # Prometheus Server Access
+  ingress {
+    from_port   = 9090
+    to_port     = 9090
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"] # For testing
+  }
 
   egress {
     from_port   = 0
@@ -68,6 +89,12 @@ resource "aws_security_group" "api_sg" {
 # The Cluster
 resource "aws_ecs_cluster" "main" {
   name = "${var.project_name}-cluster"
+}
+
+resource "aws_ssm_parameter" "prometheus_config" {
+  name  = "/ecs/prometheus-config"
+  type  = "String"
+  value = file("${path.module}/prometheus.yml")
 }
 
 # The Task Definition (Blueprint)
@@ -92,8 +119,19 @@ resource "aws_ecs_task_definition" "api_task" {
       image     = "prom/node-exporter:latest"
       essential = false # If monitoring fails, the app stays up
       portMappings = [{ containerPort = 9100, hostPort = 9100 }]
-      # Optional: Add command to disable collectors that need root (Fargate doesn't allow)
-      command = ["--path.procfs=/host/proc", "--path.sysfs=/host/sys"]
+
+    }
+    # 3. PROMETHEUS SERVER
+    {
+      name      = "prometheus"
+      image     = "prom/prometheus:latest"
+      essential = true
+      portMappings = [{ containerPort = 9090, hostPort = 9090 }]
+      environment = [
+        { name = "PROMETHEUS_CONFIG_CONTENT", value = aws_ssm_parameter.prometheus_config.value }
+      ]
+      # We tell Prometheus to use the config we pass in
+      command = ["--config.file=/etc/prometheus/prometheus.yml", "--storage.tsdb.path=/prometheus"]
     }
   ])
 }

@@ -94,7 +94,8 @@ resource "aws_ecs_cluster" "main" {
 resource "aws_ssm_parameter" "prometheus_config" {
   name  = "/ecs/prometheus-config"
   type  = "String"
-  value = file(abspath ("${path.module}/prometheus.yml"))
+  # path.cwd is often more reliable in GitHub Actions working-directories
+  value = file("${path.cwd}/prometheus.yml")
 }
 
 # The Task Definition (Blueprint)

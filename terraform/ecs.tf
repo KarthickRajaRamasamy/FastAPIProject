@@ -94,7 +94,7 @@ resource "aws_ecs_cluster" "main" {
 resource "aws_ssm_parameter" "prometheus_config" {
   name  = "/ecs/prometheus-config"
   type  = "String"
-  value = file("${path.module}/prometheus.yml")
+  value = file(abspath ("${path.module}/prometheus.yml"))
 }
 
 # The Task Definition (Blueprint)

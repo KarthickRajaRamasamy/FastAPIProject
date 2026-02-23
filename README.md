@@ -111,3 +111,4 @@ VPC & Security Groups: Configured with specific ingress rules for ports 8000, 90
 ECS Task Definition: Orchestrates three containers (API, Node Exporter, Prometheus) within a single task.
 
 IAM Roles: Task Execution roles providing necessary access to ECR and SSM Parameter Store.
+

@@ -120,7 +120,6 @@ resource "aws_iam_role_policy" "prometheus_ssm_access" {
   })
 }
 
-
 resource "aws_ecs_task_definition" "api_task" {
   family                   = "task-tracker-api"
   network_mode             = "awsvpc"
@@ -134,60 +133,55 @@ resource "aws_ecs_task_definition" "api_task" {
   }
 
   container_definitions = jsonencode([
-
+    # 1. INIT CONTAINER
     {
       name      = "config-init"
       image     = "amazon/aws-cli:latest"
       essential = false
+      entryPoint = ["/bin/sh", "-c"]
       command = [
-        "ssm", "get-parameter", "--name", "/ecs/prometheus-config",
-        "--with-decryption", "--query", "Parameter.Value",
-        "--output", "text", "--region", "us-east-1",
-        ">", "/shared/prometheus.yml"
+        "aws ssm get-parameter --name /ecs/prometheus-config --with-decryption --query 'Parameter.Value' --output text > /shared/prometheus.yml"
       ]
       mountPoints = [{
         sourceVolume  = "shared-config",
         containerPath = "/shared"
       }]
     },
-
+    # 2. API CONTAINER
     {
       name      = "api-container"
       image     = aws_ecr_repository.api_repo.repository_url
       essential = true
       portMappings = [{ containerPort = 8000, hostPort = 8000 }]
     },
+    # 3. NODE EXPORTER
     {
       name      = "node-exporter"
       image     = "prom/node-exporter:latest"
       essential = false
       portMappings = [{ containerPort = 9100, hostPort = 9100 }]
     },
-    # PROMETHEUS SERVER (UPDATED FOR FARGATE)
-{
+    # 4. PROMETHEUS SERVER
+    {
       name      = "prometheus"
       image     = "prom/prometheus:latest"
       essential = true
       portMappings = [{ containerPort = 9090, hostPort = 9090 }]
 
-      # Wait for init container to finish, then start
       dependsOn = [{
         containerName = "config-init",
         condition     = "COMPLETE"
       }]
 
       mountPoints = [{
-        sourceVolume  = "shared-config", # Matches volume name
+        sourceVolume  = "shared-config",
         containerPath = "/etc/prometheus/"
       }]
-
       command = [
-        "--config.file=/etc/prometheus/prometheus.yml",
-        "--storage.tsdb.path=/prometheus"
+        "/bin/sh", "-c", "sleep 5 && /bin/prometheus --config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/prometheus"
       ]
     }
   ])
-
 }
 # The Service (Manager)
 resource "aws_ecs_service" "api_service" {

@@ -125,7 +125,7 @@ resource "aws_ecs_task_definition" "api_task" {
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = "1024"
-  memory                   = "2048"
+  memory                   = "4096"
   execution_role_arn       = aws_iam_role.ecs_exec_role.arn
 
   volume {
@@ -133,7 +133,7 @@ resource "aws_ecs_task_definition" "api_task" {
   }
 
   container_definitions = jsonencode([
-    # 1. INIT CONTAINER
+    # 1. INIT CONTAINER (Downloads the file)
     {
       name      = "config-init"
       image     = "amazon/aws-cli:latest"
@@ -177,12 +177,16 @@ resource "aws_ecs_task_definition" "api_task" {
         sourceVolume  = "shared-config",
         containerPath = "/etc/prometheus/"
       }]
+
+      # Ensure config file path is correct
       command = [
-        "/bin/sh", "-c", "sleep 5 && /bin/prometheus --config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/prometheus"
+        "--config.file=/etc/prometheus/prometheus.yml",
+        "--storage.tsdb.path=/prometheus"
       ]
     }
   ])
 }
+
 # The Service (Manager)
 resource "aws_ecs_service" "api_service" {
   name            = "${var.project_name}-service"

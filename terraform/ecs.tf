@@ -125,8 +125,8 @@ resource "aws_ecs_task_definition" "api_task" {
   family                   = "task-tracker-api"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
-  cpu                      = "512"
-  memory                   = "1024"
+  cpu                      = "1024"
+  memory                   = "2048"
   execution_role_arn       = aws_iam_role.ecs_exec_role.arn
 
   container_definitions = jsonencode([
@@ -152,7 +152,7 @@ resource "aws_ecs_task_definition" "api_task" {
       # --- FIX: Startup Script to pull config from SSM ---
       entryPoint = ["/bin/sh", "-c"]
       command = [
-        "aws ssm get-parameter --name /ecs/prometheus-config --query 'Parameter.Value' --output text --region us-east-1 > /etc/prometheus/prometheus.yml && /bin/prometheus --config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/prometheus"
+        "aws ssm get-parameter --name /ecs/prometheus-config --with-decryption --query 'Parameter.Value' --output text --region us-east-1 > /etc/prometheus/prometheus.yml && /bin/prometheus --config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/prometheus"
       ]
       # ----------------------------------------------------
 

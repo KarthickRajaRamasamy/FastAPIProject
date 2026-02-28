@@ -40,6 +40,10 @@ jobs:
         run: terraform init -backend-config="bucket=${{ secrets.S3_STATE_BUCKET }}" -backend-config="region=${{ secrets.AWS_REGION }}"
         working-directory: ./terraform
 
+      - name: Terraform Plan
+        run: terraform plan
+        working-directory: ./terraform
+
       - name: Terraform Apply
         run: terraform apply -auto-approve
         working-directory: ./terraform

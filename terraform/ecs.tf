@@ -108,36 +108,37 @@ resource "aws_ssm_parameter" "prometheus_config" {
 }
 
 # The Task Definition (Blueprint)
+# The Task Definition (Blueprint)
 resource "aws_ecs_task_definition" "api_task" {
   family                   = "task-tracker-api"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
-  cpu                      = "512" #  vCPU
-  memory                   = "1024" #  GB
+  cpu                      = "512"
+  memory                   = "1024"
   execution_role_arn       = aws_iam_role.ecs_exec_role.arn
 
   container_definitions = jsonencode([
     {
       name      = "api-container"
-      image     = aws_ecr_repository.api_repo.repository_url # Link to your ecr.tf resource
+      image     = aws_ecr_repository.api_repo.repository_url
       essential = true
       portMappings = [{ containerPort = 8000, hostPort      = 8000 }]
     },
-    # The Prometheus Node Exporter Sidecar
     {
       name      = "node-exporter"
       image     = "prom/node-exporter:latest"
-      essential = false # If monitoring fails, the app stays up
+      essential = false
       portMappings = [{ containerPort = 9100, hostPort = 9100 }]
 
     },
-    # 3. PROMETHEUS SERVER
+    # 3. PROMETHEUS SERVER (UPDATED)
     {
       name      = "prometheus"
       image     = "prom/prometheus:latest"
       essential = true
       portMappings = [{ containerPort = 9090, hostPort = 9090 }]
 
+      # Mount the volume into the container
       mountPoints = [
         {
           sourceVolume  = "prometheus-config-volume",
@@ -146,23 +147,25 @@ resource "aws_ecs_task_definition" "api_task" {
         }
       ]
 
-      # We tell Prometheus to use the config we pass in
+      # Tell Prometheus to use this mounted file
       command = ["--config.file=/etc/prometheus/prometheus.yml", "--storage.tsdb.path=/prometheus"]
     }
   ])
 
+  # VOLUME CONFIGURATION (UPDATED)
   volume {
     name = "prometheus-config-volume"
 
     # This instructs ECS to fetch from SSM and mount as a file
-    efs_volume_configuration {
-      file_system_id = "" # Leave empty for SSM mapping
-      root_directory = ""
+    docker_volume_configuration {
+      scope = "task"
+      driver = "local"
+      driver_opts = {
+        "type"   = "none"
+        "device" = "/etc/prometheus/prometheus.yml"
+        "o"      = "bind"
+      }
     }
-    # NOTE: Direct SSM file mapping in Fargate is limited.
-    # The most robust way without code change is to use
-    # the 'docker_volume_configuration' but this requires
-    # external storage setup.
   }
 }
 

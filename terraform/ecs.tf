@@ -103,12 +103,24 @@ resource "aws_ecs_cluster" "main" {
 resource "aws_ssm_parameter" "prometheus_config" {
   name  = "/ecs/prometheus-config"
   type  = "String"
-  # path.cwd is often more reliable in GitHub Actions working-directories
   value = file("${path.cwd}/prometheus.yml")
 }
 
-# The Task Definition (Blueprint)
-# The Task Definition (Blueprint)
+resource "aws_iam_role_policy" "prometheus_ssm_access" {
+  name = "prometheus-ssm-access"
+  role = aws_iam_role.ecs_exec_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = ["ssm:GetParameter"]
+      Resource = [aws_ssm_parameter.prometheus_config.arn]
+    }]
+  })
+}
+
+
 resource "aws_ecs_task_definition" "api_task" {
   family                   = "task-tracker-api"
   network_mode             = "awsvpc"
@@ -122,53 +134,36 @@ resource "aws_ecs_task_definition" "api_task" {
       name      = "api-container"
       image     = aws_ecr_repository.api_repo.repository_url
       essential = true
-      portMappings = [{ containerPort = 8000, hostPort      = 8000 }]
+      portMappings = [{ containerPort = 8000, hostPort = 8000 }]
     },
     {
       name      = "node-exporter"
       image     = "prom/node-exporter:latest"
       essential = false
       portMappings = [{ containerPort = 9100, hostPort = 9100 }]
-
     },
-    # 3. PROMETHEUS SERVER (UPDATED)
+    # PROMETHEUS SERVER (UPDATED FOR FARGATE)
     {
       name      = "prometheus"
       image     = "prom/prometheus:latest"
       essential = true
       portMappings = [{ containerPort = 9090, hostPort = 9090 }]
 
-      # Mount the volume into the container
-      mountPoints = [
-        {
-          sourceVolume  = "prometheus-config-volume",
-          containerPath = "/etc/prometheus/prometheus.yml",
-          readOnly      = true
-        }
+      # --- FIX: Startup Script to pull config from SSM ---
+      entryPoint = ["/bin/sh", "-c"]
+      command = [
+        "aws ssm get-parameter --name /ecs/prometheus-config --query 'Parameter.Value' --output text --region us-east-1 > /etc/prometheus/prometheus.yml && /bin/prometheus --config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/prometheus"
       ]
+      # ----------------------------------------------------
 
-      # Tell Prometheus to use this mounted file
-      command = ["--config.file=/etc/prometheus/prometheus.yml", "--storage.tsdb.path=/prometheus"]
+      # Ensure container knows the region for AWS CLI
+      environment = [
+        { name = "AWS_REGION", value = "us-east-1" } # <-- CHANGE TO YOUR ACTUAL REGION
+      ]
     }
   ])
 
-  # VOLUME CONFIGURATION (UPDATED)
-  volume {
-    name = "prometheus-config-volume"
-
-    # This instructs ECS to fetch from SSM and mount as a file
-    docker_volume_configuration {
-      scope = "task"
-      driver = "local"
-      driver_opts = {
-        "type"   = "none"
-        "device" = "/etc/prometheus/prometheus.yml"
-        "o"      = "bind"
-      }
-    }
-  }
 }
-
 # The Service (Manager)
 resource "aws_ecs_service" "api_service" {
   name            = "${var.project_name}-service"

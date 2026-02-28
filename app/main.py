@@ -31,6 +31,11 @@ class TaskResponse(BaseModel):
         from_attributes =  True
 
 #endpoint update
+
+@app.on_event("startup")
+async def _startup():
+    instrumentator.expose(app, endpoint="/metrics") # Forces the path to /metrics
+
 @app.post("/tasks", response_model=TaskResponse)
 def create_task(task: TaskCreate, db: Session = Depends(get_db)):
     db_task = Task(**task.dict())

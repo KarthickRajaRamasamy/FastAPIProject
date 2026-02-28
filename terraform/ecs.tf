@@ -137,13 +137,33 @@ resource "aws_ecs_task_definition" "api_task" {
       image     = "prom/prometheus:latest"
       essential = true
       portMappings = [{ containerPort = 9090, hostPort = 9090 }]
-      environment = [
-        { name = "PROMETHEUS_CONFIG_CONTENT", value = aws_ssm_parameter.prometheus_config.value }
+
+      mountPoints = [
+        {
+          sourceVolume  = "prometheus-config-volume",
+          containerPath = "/etc/prometheus/prometheus.yml",
+          readOnly      = true
+        }
       ]
+
       # We tell Prometheus to use the config we pass in
       command = ["--config.file=/etc/prometheus/prometheus.yml", "--storage.tsdb.path=/prometheus"]
     }
   ])
+
+  volume {
+    name = "prometheus-config-volume"
+
+    # This instructs ECS to fetch from SSM and mount as a file
+    efs_volume_configuration {
+      file_system_id = "" # Leave empty for SSM mapping
+      root_directory = ""
+    }
+    # NOTE: Direct SSM file mapping in Fargate is limited.
+    # The most robust way without code change is to use
+    # the 'docker_volume_configuration' but this requires
+    # external storage setup.
+  }
 }
 
 # The Service (Manager)

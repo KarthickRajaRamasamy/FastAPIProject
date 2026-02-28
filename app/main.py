@@ -7,13 +7,13 @@ from datetime import datetime
 from models import Base, Task
 from prometheus_fastapi_instrumentator import Instrumentator
 
+app = FastAPI(title="Task Tracker API")
+
 # Create the database tables
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="Task Tracker API")
-
 # Initialize Prometheus Instrumentator ---
-Instrumentator().instrument(app).expose(app)
+Instrumentator().instrument(app).expose(app, endpoint="/metrics")
 
 #pydantic schemas
 class TaskCreate(BaseModel):
@@ -32,9 +32,9 @@ class TaskResponse(BaseModel):
 
 #endpoint update
 
-@app.on_event("startup")
-async def _startup():
-    instrumentator.expose(app, endpoint="/metrics") # Forces the path to /metrics
+@app.get("/")
+def root():
+    return {"message": "App is working"}
 
 @app.post("/tasks", response_model=TaskResponse)
 def create_task(task: TaskCreate, db: Session = Depends(get_db)):

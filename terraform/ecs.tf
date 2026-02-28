@@ -130,6 +130,23 @@ resource "aws_ecs_task_definition" "api_task" {
   execution_role_arn       = aws_iam_role.ecs_exec_role.arn
 
   container_definitions = jsonencode([
+
+    {
+      name      = "config-init"
+      image     = "amazon/aws-cli:latest"
+      essential = false
+      command = [
+        "ssm", "get-parameter", "--name", "/ecs/prometheus-config",
+        "--with-decryption", "--query", "Parameter.Value",
+        "--output", "text", "--region", "us-east-1",
+        ">", "/shared/prometheus.yml"
+      ]
+      mountPoints = [{
+        sourceVolume  = "shared-config",
+        containerPath = "/shared"
+      }]
+    },
+
     {
       name      = "api-container"
       image     = aws_ecr_repository.api_repo.repository_url
@@ -158,7 +175,7 @@ resource "aws_ecs_task_definition" "api_task" {
 
       # Ensure container knows the region for AWS CLI
       environment = [
-        { name = "AWS_REGION", value = "us-east-1" } # <-- CHANGE TO YOUR ACTUAL REGION
+        { name = "AWS_REGION", value = "us-east-1" }
       ]
     }
   ])

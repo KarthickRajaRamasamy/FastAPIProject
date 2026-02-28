@@ -129,6 +129,10 @@ resource "aws_ecs_task_definition" "api_task" {
   memory                   = "2048"
   execution_role_arn       = aws_iam_role.ecs_exec_role.arn
 
+  volume {
+    name = "shared-config"
+  }
+
   container_definitions = jsonencode([
 
     {
@@ -160,22 +164,26 @@ resource "aws_ecs_task_definition" "api_task" {
       portMappings = [{ containerPort = 9100, hostPort = 9100 }]
     },
     # PROMETHEUS SERVER (UPDATED FOR FARGATE)
-    {
+{
       name      = "prometheus"
       image     = "prom/prometheus:latest"
       essential = true
       portMappings = [{ containerPort = 9090, hostPort = 9090 }]
 
-      # --- FIX: Startup Script to pull config from SSM ---
-      entryPoint = ["/bin/sh", "-c"]
-      command = [
-        "aws ssm get-parameter --name /ecs/prometheus-config --with-decryption --query 'Parameter.Value' --output text --region us-east-1 > /etc/prometheus/prometheus.yml && /bin/prometheus --config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/prometheus"
-      ]
-      # ----------------------------------------------------
+      # Wait for init container to finish, then start
+      dependsOn = [{
+        containerName = "config-init",
+        condition     = "COMPLETE"
+      }]
 
-      # Ensure container knows the region for AWS CLI
-      environment = [
-        { name = "AWS_REGION", value = "us-east-1" }
+      mountPoints = [{
+        sourceVolume  = "shared-config", # Matches volume name
+        containerPath = "/etc/prometheus/"
+      }]
+
+      command = [
+        "--config.file=/etc/prometheus/prometheus.yml",
+        "--storage.tsdb.path=/prometheus"
       ]
     }
   ])
